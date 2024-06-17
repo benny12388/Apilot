@@ -81,6 +81,14 @@ class Apilot(Plugin):
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
             return
 
+        if content == "美图":
+            bagua = self.get_mx_meitu()
+            reply_type = ReplyType.IMAGE_URL if self.is_valid_url(meitu) else ReplyType.TEXT
+            reply = self.create_reply(reply_type, meitu)
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            return
+            
         if content.startswith("快递"):
             # Extract the part after "快递"
             tracking_number = content[2:].strip()
@@ -159,6 +167,7 @@ class Apilot(Plugin):
         help_text += "  🐟 摸鱼: 发送“摸鱼”获取摸鱼人日历。\n"
         help_text += "  🔥 热榜: 发送“xx热榜”查看支持的热榜。\n"
         help_text += "  🔥 八卦: 发送“八卦”获取明星八卦。\n"
+        help_text += "  🌅 美图: 发送“美图”获取每日一图。\n"
 
         # 查询类
         help_text += "\n🔍 查询工具：\n"
@@ -517,7 +526,23 @@ class Apilot(Plugin):
         else:
             logger.error(f"错误信息：{bagua_info}")
             return "暂无明星八卦，吃瓜莫急"
-
+            
+ def get_mx_meitu(self):
+        url = "https://v2.alapi.cn/api/bing"
+        payload = "format=json"
+        headers = {'Content-Type': "application/x-www-form-urlencoded"}
+        meitu_info = self.make_request(url, method="POST", headers=headers, data=payload)
+        # 验证请求是否成功
+        if isinstance(meitu_info, dict) and meitu_info['code'] == 200:
+            meitu_pic_url = meitu_info["data"]
+            if self.is_valid_image_url(meitu_pic_url):
+                return meitu_pic_url
+            else:
+                return "今天没有图片看啦"
+        else:
+            logger.error(f"错误信息：{meitu_info}")
+            return "请休息下，明天再来吧"
+            
     def make_request(self, url, method="GET", headers=None, params=None, data=None, json_data=None):
         try:
             if method.upper() == "GET":
