@@ -529,7 +529,7 @@ class Apilot(Plugin):
             
     def get_mx_meitu(self):
         url = "https://api.vvhan.com/api/bing"
-        payload = "format=json"
+        payload = "format=json&rand=sj"
         headers = {'Content-Type': "application/x-www-form-urlencoded"}
         meitu_info = self.make_request(url, method="POST", headers=headers, data=payload)
         # 验证请求是否成功
