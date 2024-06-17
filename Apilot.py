@@ -82,7 +82,7 @@ class Apilot(Plugin):
             return
 
         if content == "美图":
-            bagua = self.get_mx_meitu()
+            meitu = self.get_mx_meitu()
             reply_type = ReplyType.IMAGE_URL if self.is_valid_url(meitu) else ReplyType.TEXT
             reply = self.create_reply(reply_type, meitu)
             e_context["reply"] = reply
