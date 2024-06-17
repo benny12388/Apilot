@@ -528,8 +528,8 @@ class Apilot(Plugin):
             return "暂无明星八卦，吃瓜莫急"
             
     def get_mx_meitu(self):
-        url = "https://api.vvhan.com/api/bing?type=json"
-        payload = "format=json&rand=sj"
+        url = "https://v2.alapi.cn/api/bing"
+        payload = "token=oa2uu9KRSqxowOVY&format=json"
         headers = {'Content-Type': "application/x-www-form-urlencoded"}
         meitu_info = self.make_request(url, method="POST", headers=headers, data=payload)
         # 验证请求是否成功
