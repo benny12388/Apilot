@@ -527,8 +527,9 @@ class Apilot(Plugin):
             logger.error(f"错误信息：{bagua_info}")
             return "暂无明星八卦，吃瓜莫急"
             
-    def get_mx_meitu(self, alapi_token):
+    def get_mx_meitu(self):
         url = "https://v2.alapi.cn/api/bing"
+        alapi_token= "oa2uu9KRSqxowOVY"
         payload = "format=json"
         headers = {'Content-Type': "application/x-www-form-urlencoded"}
         meitu_info = self.make_request(url, method="POST", headers=headers, data=payload)
