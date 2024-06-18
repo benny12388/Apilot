@@ -528,16 +528,27 @@ class Apilot(Plugin):
 
     def get_history_of_today(self):
         url = "https://v2.alapi.cn/api/eventHistory"
-        payload = f"token=oa2uu9KRSqxowOVY&monthday={datetime.now().strftime('%m%d')}&page=1"
+        today_str = datetime.now().strftime('%m%d')
+        payload = f"token=oa2uu9KRSqxowOVY&monthday={today_str}&page=1"
         headers = {'Content-Type': "application/x-www-form-urlencoded"}
 
         response = self.make_request(url, method="POST", headers=headers, data=payload)
+    
+        # 检查response是否是字典并且有'code'键且值为200
         if isinstance(response, dict) and response.get('code') == 200:
-            # 假设API返回的数据结构中历史事件介绍在'data'键下
-            return response.get('data', '今天没有特别的历史事件介绍。')
-        else:
-            self.handle_error(response, "获取历史上的今天信息失败")
-            return "历史上的今天信息获取失败，请稍后再试。"
+        # 检查'data'字段是否是列表，并将其转换为字符串
+            data = response.get('data', [])
+            if isinstance(data, list):
+            # 将列表转换为字符串，例如使用列表元素的逗号拼接
+            history_str = ", ".join(data)
+            else:
+            history_str = data  # 或者直接使用data作为字符串
+            return history_str
+       else:
+        # 处理API调用失败的情况
+        error_message = "获取历史上的今天信息失败"
+        self.handle_error(response, error_message)
+            return error_message
             
     def make_request(self, url, method="GET", headers=None, params=None, data=None, json_data=None):
         try:
