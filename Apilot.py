@@ -80,6 +80,13 @@ class Apilot(Plugin):
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
             return
+
+        if content == "历史":
+            history_info = self.get_history_of_today()
+            reply = self.create_reply(ReplyType.TEXT, history_info)
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            return
             
         if content.startswith("快递"):
             # Extract the part after "快递"
@@ -518,6 +525,19 @@ class Apilot(Plugin):
         else:
             logger.error(f"错误信息：{bagua_info}")
             return "暂无明星八卦，吃瓜莫急"
+
+    def get_history_of_today(self):
+        url = "https://v2.alapi.cn/api/eventHistory"
+        payload = f"token=oa2uu9KRSqxowOVY&monthday={datetime.now().strftime('%m%d')}&page=1"
+        headers = {'Content-Type': "application/x-www-form-urlencoded"}
+
+        response = self.make_request(url, method="POST", headers=headers, data=payload)
+        if isinstance(response, dict) and response.get('code') == 200:
+            # 假设API返回的数据结构中历史事件介绍在'data'键下
+            return response.get('data', '今天没有特别的历史事件介绍。')
+        else:
+            self.handle_error(response, "获取历史上的今天信息失败")
+            return "历史上的今天信息获取失败，请稍后再试。"
             
     def make_request(self, url, method="GET", headers=None, params=None, data=None, json_data=None):
         try:
