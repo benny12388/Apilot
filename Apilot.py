@@ -57,6 +57,7 @@ class Apilot(Plugin):
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
             return
+            
         if content == "摸鱼":
             moyu = self.get_moyu_calendar()
             reply_type = ReplyType.IMAGE_URL if self.is_valid_url(moyu) else ReplyType.TEXT
@@ -81,13 +82,79 @@ class Apilot(Plugin):
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
             return
 
-        if content == "历史":
-            history_info = self.get_history_of_today()
-            reply = self.create_reply(ReplyType.TEXT, history_info)
+        if content == "职场日历":
+            zhichang_calendar = self.get_zhichang_calendar()
+            reply_type = ReplyType.IMAGE_URL if self.is_valid_url(zhichang_calendar) else ReplyType.TEXT
+            reply = self.create_reply(reply_type, zhichang_calendar)
             e_context["reply"] = reply
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
             return
-            
+
+        if content == "风景图片":
+            wallpaper = self.get_wallpaper()
+            reply_type = ReplyType.IMAGE_URL if self.is_valid_url(wallpaper) else ReplyType.TEXT
+            reply = self.create_reply(reply_type, wallpaper)
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            return
+
+        if content == "动漫图片":
+            acg_wallpaper = self.get_acg_wallpaper()
+            reply_type = ReplyType.IMAGE_URL if self.is_valid_url(acg_wallpaper) else ReplyType.TEXT
+            reply = self.create_reply(reply_type, acg_wallpaper)
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            return
+
+        if content == "精选头像":
+            avatar = self.get_random_avatar()
+            reply_type = ReplyType.IMAGE_URL if self.is_valid_url(avatar) else ReplyType.TEXT
+            reply = self.create_reply(reply_type, avatar)
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            return
+
+        if content == "cosplay":
+            cosplay_wallpaper = self.get_cosplay_wallpaper()
+            reply_type = ReplyType.IMAGE_URL if self.is_valid_url(cosplay_wallpaper) else ReplyType.TEXT
+            reply = self.create_reply(reply_type, cosplay_wallpaper)
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            return
+
+        if content == "烧话":
+            sexy_phrase = self.get_sexy_phrase()
+            reply_type = ReplyType.TEXT  # 烧话是文本，直接使用文本类型的回复
+            reply = self.create_reply(reply_type, sexy_phrase)
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            return
+
+        if content == "情话":
+            love_phrase = self.get_love_phrase()
+            reply_type = ReplyType.TEXT  # 情话是文本，使用文本类型的回复
+            reply = self.create_reply(reply_type, love_phrase)
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+            return
+
+         if content.startswith("表情包") and " " in content:
+            parts = content.split(" ", 1)  # 分割字符串，获取关键词
+            if len(parts) > 1:
+                keyword = parts[1]  # 提取关键词
+                images_data = self.search_doutu_images(keyword)
+                if isinstance(images_data, list) and images_data:
+                    # 假定返回的列表中第一个元素是图片链接
+                    image_url = images_data[0]
+                    reply_type = ReplyType.IMAGE_URL if self.is_valid_url(image_url) else ReplyType.TEXT
+                    reply = self.create_reply(reply_type, image_url)
+                    e_context["reply"] = reply
+                    e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+                else:
+                    # 如果没有找到图片或返回错误信息，创建文本回复
+                    reply = self.create_reply(ReplyType.TEXT, images_data)
+                    e_context["reply"] = reply
+
         if content.startswith("快递"):
             # Extract the part after "快递"
             tracking_number = content[2:].strip()
@@ -166,13 +233,19 @@ class Apilot(Plugin):
         help_text += "  🐟 摸鱼: 发送“摸鱼”获取摸鱼人日历。\n"
         help_text += "  🔥 热榜: 发送“xx热榜”查看支持的热榜。\n"
         help_text += "  🔥 八卦: 发送“八卦”获取明星八卦。\n"
-        help_text += "  🌅 历史: 发送“历史”获取历史上的今天。\n"
+        help_text += "  📅 职场日历: 发送“职场日历”获取职场日历。\n"
+        help_text += "  🔥 精选头像: 发送“精选头像”获取精选头像图片。\n"
+        help_text += "  🍃 风景图片: 发送“风景图片”获取超清风景图片。\n"
+        help_text += "  👩‍👧‍👦 动漫图片: 发送“动漫图片”获取超清风景图片。\n"
+        help_text += "  👩‍👧‍👦 烧话: 发送“烧话”获取一句骚话。\n"
+        help_text += "  👩‍👧‍👦 情话: 发送“情话”获取一句情话。\n"
 
         # 查询类
         help_text += "\n🔍 查询工具：\n"
         help_text += "  🌦️ 天气: 发送“城市+天气”查天气，如“北京天气”。\n"
         help_text += "  📦 快递: 发送“快递+单号”查询快递状态。如“快递112345655”\n"
         help_text += "  🌌 星座: 发送星座名称查看今日运势，如“白羊座”。\n"
+        help_text += "  😌 表情包: 发送"表情包+关键词"查看表情包，如“表情包 哈哈”。\n"
 
         return help_text
 
@@ -245,6 +318,28 @@ class Apilot(Plugin):
                     return "周末无需摸鱼，愉快玩耍吧"
             else:
                 return "暂无可用“摸鱼”服务，认真上班"
+
+    def get_zhichang_calendar(self):
+        url = "https://api.vvhan.com/api/zhichang"
+        payload = "format=json"
+        headers = {'Content-Type': "application/x-www-form-urlencoded"}
+        try:
+            # 发起POST请求
+            response = requests.post(url, headers=headers, data=payload)
+            # 解析JSON数据
+            zhichang_calendar_info = response.json()
+            # 检查请求是否成功
+            if isinstance(zhichang_calendar_info, dict) and zhichang_calendar_info.get('success', False):
+            # 假设返回的数据中包含图片URL的字段名为'image'
+                image_url = zhichang_calendar_info.get('image')
+                if self.is_valid_image_url(image_url):
+                    return image_url
+                else:
+                    return "获取职场日历失败，图片URL无效"
+            else:
+                return self.handle_error(zhichang_calendar_info, "获取职场日历失败，请稍后再试")
+        except Exception as e:
+            return self.handle_error(e, "获取职场日历失败")
 
     def get_moyu_calendar_video(self):
         url = "https://dayu.qqsuu.cn/moyuribaoshipin/apis.php?type=json"
@@ -526,30 +621,130 @@ class Apilot(Plugin):
             logger.error(f"错误信息：{bagua_info}")
             return "暂无明星八卦，吃瓜莫急"
 
-    def get_history_of_today(self):
-        url = "https://v2.alapi.cn/api/eventHistory"
-        today_str = datetime.now().strftime('%m%d')
-        payload = f"token=oa2uu9KRSqxowOVY&monthday={today_str}&page=1"
+    def get_wallpaper(self):
+        url = "https://api.vvhan.com/api/wallpaper/views"
+        payload = "format=json"
         headers = {'Content-Type': "application/x-www-form-urlencoded"}
-
-        response = self.make_request(url, method="POST", headers=headers, data=payload)
-    
-        # 检查response是否是字典并且有'code'键且值为200
-        if isinstance(response, dict) and response.get('code') == 200:
-        # 检查'data'字段是否是列表，并将其转换为字符串
-            data = response.get('data', [])
-            if isinstance(data, list):
-            # 将列表转换为字符串，例如使用列表元素的逗号拼接
-            history_str = ", ".join(data)
+        try:
+            # 发起POST请求
+            response = requests.post(url, headers=headers, data=payload)
+            # 解析JSON数据
+            wallpaper_info = response.json()
+            # 检查请求是否成功
+            if isinstance(wallpaper_info, dict) and wallpaper_info.get('success', False):
+                # 假设返回的数据中包含图片URL的字段名为'image'
+                image_url = wallpaper_info.get('image')
+                if self.is_valid_image_url(image_url):
+                    return image_url
+                else:
+                    return "获取风景图片失败，图片URL无效"
             else:
-            history_str = data  # 或者直接使用data作为字符串
-            return history_str
-       else:
-        # 处理API调用失败的情况
-        error_message = "获取历史上的今天信息失败"
-        self.handle_error(response, error_message)
-            return error_message
-            
+                return self.handle_error(wallpaper_info, "获取风景图片失败，请稍后再试")
+        except Exception as e:
+            return self.handle_error(e, "获取风景图片失败")
+
+    def get_acg_wallpaper(self):
+        url = "https://api.vvhan.com/api/wallpaper/acg"
+        payload = "format=json"
+        headers = {'Content-Type': "application/x-www-form-urlencoded"}
+        try:
+            # 发起POST请求
+            response = requests.post(url, headers=headers, data=payload)
+            # 解析JSON数据
+            acg_wallpaper_info = response.json()
+            # 检查请求是否成功
+            if isinstance(acg_wallpaper_info, dict) and acg_wallpaper_info.get('success', False):
+                # 假设返回的数据中包含图片URL的字段名为'image'
+                image_url = acg_wallpaper_info.get('image')
+                if self.is_valid_image_url(image_url):
+                    return image_url
+                else:
+                    return "获取动漫图片失败，图片URL无效"
+            else:
+                return self.handle_error(acg_wallpaper_info, "获取动漫图片失败，请稍后再试")
+        except Exception as e:
+            return self.handle_error(e, "获取动漫图片失败")
+
+    def get_cosplay_wallpaper(self):
+        url = "https://api.vvhan.com/api/wallpaper/mobileGirl"
+        try:
+            # 发起GET请求
+            response = requests.get(url)
+            # 解析JSON数据
+            cosplay_wallpaper_info = response.json()
+            # 检查请求是否成功
+            if isinstance(cosplay_wallpaper_info, dict) and cosplay_wallpaper_info.get('success', False):
+            # 假设返回的数据中包含图片URL的字段名为'image'
+                image_url = cosplay_wallpaper_info.get('image')
+                if self.is_valid_image_url(image_url):
+                    return image_url
+                else:
+                    return "获取cosplay图片失败，图片URL无效"
+            else:
+                return self.handle_error(cosplay_wallpaper_info, "获取cosplay图片失败，请稍后再试")
+        except Exception as e:
+            return self.handle_error(e, "获取cosplay图片失败")
+
+    def get_sexy_phrase(self):
+        url = "https://api.vvhan.com/api/text/sexy"
+        try:
+            # 发起GET请求
+            response = requests.get(url)
+            # 解析JSON数据
+            sexy_phrase_info = response.json()
+            # 检查请求是否成功
+            if sexy_phrase_info.get('success', False):
+            # 假设返回的数据中包含烧话文本的字段名为'text'
+                phrase = sexy_phrase_info.get('text')
+                return phrase
+            else:
+                # 错误处理，根据实际的API响应调整错误信息
+                error_message = sexy_phrase_info.get('message', '获取烧话失败')
+                return self.handle_error(error_message, "获取烧话失败，请稍后再试")
+        except Exception as e:
+            return self.handle_error(str(e), "获取烧话失败")
+
+    def get_love_phrase(self):
+        url = "https://api.vvhan.com/api/text/love"
+        try:
+            # 发起GET请求
+            response = requests.get(url)
+            # 确保请求成功
+            response.raise_for_status()
+            # 假设返回的JSON数据中直接包含情话文本
+            love_phrase = response.text
+            return love_phrase
+        except requests.exceptions.RequestException as e:
+            # 网络请求异常处理
+            return self.handle_error(str(e), "获取情话失败，请稍后再试")
+
+    def search_doutu_images(self, keyword):
+        url = "https://v2.alapi.cn/api/doutu"
+        params = {
+            "token": self.alapi_token,  # 假定已经获取并存储了有效的token
+            "keyword": keyword,
+            "page": 1,
+            "type": 7  # 根据文档，type=7是推荐的表情包来源
+        }
+        try:
+            # 发起GET请求
+            response = requests.get(url, params=params)
+            response.raise_for_status()  # 确保请求成功
+            doutu_images_info = response.json()
+            # 检查请求是否成功
+            if isinstance(doutu_images_info, dict) and doutu_images_info.get('code') == 200:
+                images_data = doutu_images_info.get('data', [])
+                if images_data:  # 假设返回的是包含图片链接的列表
+                    # 返回第一页的表情包图片链接，如果有更多逻辑可以在这里扩展
+                    return images_data
+                else:
+                    return "没有找到相关的表情包图片。"
+            else:
+                error_message = doutu_images_info.get('msg', '未知错误')
+                return self.handle_error(error_message, "搜索表情包失败，请稍后再试")
+        except requests.exceptions.RequestException as e:
+            return self.handle_error(str(e), "搜索表情包失败")
+
     def make_request(self, url, method="GET", headers=None, params=None, data=None, json_data=None):
         try:
             if method.upper() == "GET":
@@ -638,3 +833,4 @@ hot_trend_types = {
     "百度": "baiduRD",
     "豆瓣": "douban",
 }
+
